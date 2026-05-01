@@ -1,0 +1,231 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: leads
+    description: Lead management
+  - name: events
+    description: Event tracking
+  - name: admin
+    description: Admin operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /leads:
+    post:
+      operationId: createLead
+      tags: [leads]
+      summary: Create a lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLeadBody"
+      responses:
+        "201":
+          description: Lead created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+
+  /events:
+    post:
+      operationId: trackEvent
+      tags: [events]
+      summary: Track an analytics event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrackEventBody"
+      responses:
+        "204":
+          description: Event recorded
+
+  /admin/leads:
+    get:
+      operationId: listLeads
+      tags: [admin]
+      summary: List all leads (admin)
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of leads
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeadList"
+        "403":
+          description: Forbidden
+
+  /admin/stats:
+    get:
+      operationId: getStats
+      tags: [admin]
+      summary: Get analytics stats (admin)
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stats"
+        "403":
+          description: Forbidden
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    CreateLeadBody:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        baseSize:
+          type: number
+        leadsCount:
+          type: number
+        salesCount:
+          type: number
+        avgCheck:
+          type: number
+        lostRevenue:
+          type: number
+      required:
+        - name
+        - phone
+        - baseSize
+        - leadsCount
+        - salesCount
+        - avgCheck
+        - lostRevenue
+
+    Lead:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        baseSize:
+          type: number
+        leadsCount:
+          type: number
+        salesCount:
+          type: number
+        avgCheck:
+          type: number
+        lostRevenue:
+          type: number
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - phone
+        - baseSize
+        - leadsCount
+        - salesCount
+        - avgCheck
+        - lostRevenue
+        - createdAt
+
+    LeadList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lead"
+        total:
+          type: integer
+      required:
+        - items
+        - total
+
+    TrackEventBody:
+      type: object
+      properties:
+        eventType:
+          type: string
+          enum:
+            - page_view
+            - calc_completed
+            - cta_clicked
+            - form_submitted
+      required:
+        - eventType
+
+    Stats:
+      type: object
+      properties:
+        totalVisits:
+          type: integer
+        calcCompletions:
+          type: integer
+        ctaClicks:
+          type: integer
+        formSubmissions:
+          type: integer
+        conversionToCalc:
+          type: number
+        conversionToCta:
+          type: number
+        conversionToForm:
+          type: number
+      required:
+        - totalVisits
+        - calcCompletions
+        - ctaClicks
+        - formSubmissions
+        - conversionToCalc
+        - conversionToCta
+        - conversionToForm
